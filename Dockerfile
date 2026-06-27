@@ -1,5 +1,5 @@
 # Використовуємо офіційний образ PHP з веб-сервером Apache
-FROM php:8.2-apache
+FROM php:8.4-apache
 
 # Встановлюємо системні залежності та купу додаткових бібліотек
 RUN apt-get update && apt-get install -y \
