@@ -53,8 +53,3 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
 Route::get('/validator/{vehicle_id}', [ValidatorController::class, 'showTerminal']);
 Route::post('/validator/{vehicle_id}/scan', [ValidatorController::class, 'processPayment']);
 
-Route::get('/run-migrations', function () {
-
-    Artisan::call('migrate', ['--force' => true]);
-    return "Міграції успішно виконано! База даних готова.";
-});
