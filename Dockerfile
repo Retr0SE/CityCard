@@ -28,7 +28,7 @@ COPY . /var/www/html
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Встановлюємо пакети БЕЗ виконання скриптів (--no-scripts), щоб уникнути помилок Artisan
-RUN composer install --optimize-autoloader --no-dev --no-scripts
+RUN composer update --optimize-autoloader --no-dev --no-scripts
 
 # Надаємо веб-серверу права на запис
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
