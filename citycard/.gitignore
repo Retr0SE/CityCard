@@ -1,0 +1,22 @@
+# Laravel / Composer
+/vendor/
+/node_modules/
+/public/build/
+/public/hot
+/public/storage
+/storage/*.key
+/storage/framework/cache/data/*.php
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+
+.env
+.env.backup
+.env.production
+
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
