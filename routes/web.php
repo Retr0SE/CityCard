@@ -53,16 +53,16 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
 Route::get('/validator/{vehicle_id}', [ValidatorController::class, 'showTerminal']);
 Route::post('/validator/{vehicle_id}/scan', [ValidatorController::class, 'processPayment']);
 
-Route::get('/run-admin-seeder', function () {
+
+Route::get('/run-transport-seeder', function () {
     try {
-        // Запускаємо конкретний клас сідеру з прапорцем --force для продакшену
         Artisan::call('db:seed', [
-            '--class' => 'Database\\Seeders\\AdminSeeder',
+            // Вкажіть тут точну назву вашого класу сідеру
+            '--class' => 'Database\\Seeders\\TransportSeeder', 
             '--force' => true
         ]);
-        
-        return "Сідер AdminSeeder успішно виконано! Адміністратора створено.";
+        return "Транспорт успішно завантажено в базу!";
     } catch (\Exception $e) {
-        return "Помилка під час запуску сідеру: " . $e->getMessage();
+        return "Помилка: " . $e->getMessage();
     }
 });

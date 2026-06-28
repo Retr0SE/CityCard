@@ -17,7 +17,7 @@ class AdminSeeder extends Seeder
         User::create([
             'full_name' => 'Головний Адміністратор',
             'login' => 'admin',
-            'password' => Hash::make('super_secure_password'), // пароль обов'язково хешується
+            'password' => Hash::make('12345'), 
             'role' => 'admin',
         ]);
     }
