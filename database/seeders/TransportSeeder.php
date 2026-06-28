@@ -22,7 +22,7 @@ class TransportSeeder extends Seeder
 
         foreach ($transports as $transport) {
 
-            Transport::create($transport);
+            TransportType::create($transport);
         }
     }
 }
