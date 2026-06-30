@@ -1,0 +1,240 @@
+openapi: 3.0.0
+info:
+  title: CityCard API
+  version: 1.0.0
+  description: Документація API для системи електронного квитка CityCard. Дозволяє керувати містами, видами транспорту та типами квитків.
+servers:
+  - url: https://citycard-app.onrender.com/api
+    description: Основний сервер (Production)
+  - url: http://localhost:8000/api
+    description: Локальний сервер (Development)
+
+paths:
+  # ==========================================
+  # ТРАНСПОРТ (Transports)
+  # ==========================================
+  /transports:
+    get:
+      summary: Отримати список усіх видів транспорту
+      tags:
+        - Транспорт
+      responses:
+        '200':
+          description: Успішно отримано список
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transport'
+    post:
+      summary: Створити новий вид транспорту
+      tags:
+        - Транспорт
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransportInput'
+      responses:
+        '201':
+          description: Транспорт успішно створено
+
+  /transports/{id}:
+    put:
+      summary: Редагувати існуючий вид транспорту
+      tags:
+        - Транспорт
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID транспорту
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransportInput'
+      responses:
+        '200':
+          description: Дані успішно оновлено
+    delete:
+      summary: Видалити вид транспорту
+      tags:
+        - Транспорт
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Транспорт успішно видалено
+
+  # ==========================================
+  # МІСТА (Cities)
+  # ==========================================
+  /cities:
+    get:
+      summary: Отримати список усіх міст
+      tags:
+        - Міста
+      responses:
+        '200':
+          description: Успішно отримано список
+    post:
+      summary: Додати нове місто
+      tags:
+        - Міста
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Рівне"
+      responses:
+        '201':
+          description: Місто створено
+
+  /cities/{id}:
+    put:
+      summary: Редагувати назву міста
+      tags:
+        - Міста
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Луцьк"
+      responses:
+        '200':
+          description: Назву оновлено
+    delete:
+      summary: Видалити місто
+      tags:
+        - Міста
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Місто видалено
+
+  # ==========================================
+  # ТИПИ КВИТКІВ (Ticket Types)
+  # ==========================================
+  /ticket-types:
+    get:
+      summary: Отримати всі типи квитків (студентський, звичайний тощо)
+      tags:
+        - Типи квитків
+      responses:
+        '200':
+          description: Список типів квитків
+    post:
+      summary: Створити новий тип квитка
+      tags:
+        - Типи квитків
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Пільговий"
+                price:
+                  type: number
+                  example: 4.50
+      responses:
+        '201':
+          description: Тип квитка створено
+
+  /ticket-types/{id}:
+    put:
+      summary: Редагувати тип квитка
+      tags:
+        - Типи квитків
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Студентський"
+                price:
+                  type: number
+                  example: 5.00
+      responses:
+        '200':
+          description: Дані оновлено
+    delete:
+      summary: Видалити тип квитка
+      tags:
+        - Типи квитків
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Тип квитка видалено
+
+components:
+  schemas:
+    Transport:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Автобус"
+        created_at:
+          type: string
+          format: date-time
+    TransportInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "Тролейбус"
