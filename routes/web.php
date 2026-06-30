@@ -66,3 +66,15 @@ Route::get('/run-transport-seeder', function () {
         return "Помилка: " . $e->getMessage();
     }
 });
+
+Route::get('/run-admin-seeder', function () {
+    try {
+        Artisan::call('db:seed', [
+            '--class' => 'Database\\Seeders\\AdminSeeder',
+            '--force' => true // Обов'язково для запуску в production на Render
+        ]);
+        return "Сідер адміністратора успішно виконано! Нові дані записані.";
+    } catch (\Exception $e) {
+        return "Помилка при виконанні сідеру: " . $e->getMessage();
+    }
+});
