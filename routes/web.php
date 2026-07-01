@@ -82,8 +82,13 @@ Route::get('/run-admin-seeder', function () {
 
 Route::get('/sync-database', function () {
     try {
+        // 1. Спочатку створюємо таблиці
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        
+        // 2. Потім наповнюємо їх
         \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-        return "База даних успішно синхронізована!";
+        
+        return "База даних успішно створена та синхронізована!";
     } catch (\Exception $e) {
         return "Помилка: " . $e->getMessage();
     }
