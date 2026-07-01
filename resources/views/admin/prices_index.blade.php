@@ -17,8 +17,16 @@
 
             <label style="font-weight: 500; display: block; margin-bottom: 8px;">Тип транспорту:</label>
             <select name="transport_type_id" required>
-                <option value="" disabled selected>Оберіть тип...</option>
+                <option value="" disabled selected>Оберіть транспорт...</option>
                 @foreach($transportTypes as $type) <option value="{{ $type->id }}">{{ $type->type_name }}</option> @endforeach
+            </select>
+
+            <label style="font-weight: 500; display: block; margin-bottom: 8px;">Тип квитка (Тариф):</label>
+            <select name="ticket_type_id" required>
+                <option value="" disabled selected>Оберіть тариф...</option>
+                @foreach($ticketTypes as $ticketType) 
+                    <option value="{{ $ticketType->id }}">{{ $ticketType->name }}</option> 
+                @endforeach
             </select>
 
             <label style="font-weight: 500; display: block; margin-bottom: 8px;">Вартість квитка (₴):</label>
@@ -30,20 +38,26 @@
 
     <div class="content-card">
         <h3>Поточна сітка тарифів</h3>
-        <table>
+        <table style="width: 100%; border-collapse: collapse;">
             <tr>
-                <th>Місто</th>
-                <th>Транспорт</th>
-                <th>Вартість</th>
-                <th style="text-align: right;">Дії</th>
+                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #eaeaea;">Місто</th>
+                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #eaeaea;">Транспорт</th>
+                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #eaeaea;">Тип квитка</th>
+                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #eaeaea;">Вартість</th>
+                <th style="text-align: right; padding: 10px; border-bottom: 2px solid #eaeaea;">Дії</th>
             </tr>
             @foreach($prices as $price)
             <tr>
-                <td>{{ $price->city->city_name }}</td>
-                <td>{{ $price->transportType->type_name }}</td>
-                <td style="color: #0052d4; font-weight: bold; font-size: 16px;">{{ number_format($price->price, 2) }} ₴</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eaeaea;">{{ $price->city->city_name }}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eaeaea;">{{ $price->transportType->type_name }}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eaeaea;">
+                    <span style="background: #e6f0ff; color: #0052d4; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold;">
+                        {{ $price->ticketType->name ?? 'Не вказано' }}
+                    </span>
+                </td>
+                <td style="padding: 10px; border-bottom: 1px solid #eaeaea; color: #0052d4; font-weight: bold; font-size: 16px;">{{ number_format($price->price, 2) }} ₴</td>
                 
-                <td style="text-align: right; display: flex; justify-content: flex-end; gap: 15px;">
+                <td style="padding: 10px; border-bottom: 1px solid #eaeaea; text-align: right; display: flex; justify-content: flex-end; gap: 15px;">
                     <button type="button" onclick="document.getElementById('edit-price-{{ $price->id }}').style.display='flex'" style="background: none; border: none; color: #0052d4; cursor: pointer; font-weight: bold; font-size: 14px; padding: 0;">Редагувати</button>
                     
                     <form action="/admin/prices/{{ $price->id }}" method="POST" onsubmit="return confirm('Видалити тариф?');">
@@ -69,6 +83,13 @@
                                 <select name="transport_type_id" required>
                                     @foreach($transportTypes as $t) 
                                         <option value="{{ $t->id }}" {{ $price->transport_type_id == $t->id ? 'selected' : '' }}>{{ $t->type_name }}</option> 
+                                    @endforeach
+                                </select>
+
+                                <label style="font-weight: 500; display: block; margin-bottom: 8px;">Тип квитка (Тариф):</label>
+                                <select name="ticket_type_id" required>
+                                    @foreach($ticketTypes as $tt) 
+                                        <option value="{{ $tt->id }}" {{ $price->ticket_type_id == $tt->id ? 'selected' : '' }}>{{ $tt->name }}</option> 
                                     @endforeach
                                 </select>
 

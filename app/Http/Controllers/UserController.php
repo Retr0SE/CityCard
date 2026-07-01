@@ -9,34 +9,37 @@ use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 use App\Models\Vehicle;
 use App\Models\TicketPrice;
-
+use App\Models\TicketType;
 
 class UserController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = Auth::user();
         $cards = Card::where('user_id', $user->id)
-                     ->with(['transactions' => function($query) {
-                         $query->latest(); 
-                     }])->get();
+                    ->orderBy('id', 'asc') 
+                    ->with(['ticketType', 'transactions' => function($query) {
+                        $query->latest(); 
+                    }])->get();
 
-        // Завантажуємо весь транспорт, щоб вивести його в список для оплати
-        $vehicles = \App\Models\Vehicle::with(['city', 'transportType'])
+        $vehicles = Vehicle::with(['city', 'transportType'])
             ->get()
             ->filter(function ($vehicle) {
-                // Залишаємо транспорт лише якщо для цього міста і типу Є тариф
-                return \App\Models\TicketPrice::where('city_id', $vehicle->city_id)
+                return TicketPrice::where('city_id', $vehicle->city_id)
                     ->where('transport_type_id', $vehicle->transport_type_id)
                     ->exists();
             });
 
-        return view('user.dashboard', compact('cards', 'vehicles'));
+        $ticketTypes = TicketType::all();
+
+        // Беремо ID картки з URL або беремо першу з бази, якщо вона є
+        $activeCardId = $request->query('active_card', $cards->isNotEmpty() ? $cards->first()->id : null);
+
+        return view('user.dashboard', compact('cards', 'vehicles', 'ticketTypes', 'activeCardId'));
     }
 
     public function topUp(Request $request)
     {
-        // Додаємо перевірку: сума обов'язкова, це число, мінімум 1 грн, максимум 10 000 грн
         $request->validate([
             'card_id' => 'required|exists:cards,id',
             'amount' => 'required|numeric|min:1|max:10000'
@@ -45,46 +48,63 @@ class UserController extends Controller
         $card = Card::findOrFail($request->card_id);
 
         DB::transaction(function () use ($card, $request) {
-            
             $card->balance += $request->amount;
             $card->save();
 
             Transaction::create([
                 'card_id' => $card->id,
-                'amount' => $request->amount, // І в історію записуємо саме її
+                'amount' => $request->amount,
                 'transaction_type' => 'TOPUP'
             ]);
         });
 
-        return back()->with('success', 'Рахунок успішно поповнено на ' . number_format($request->amount, 2) . ' грн!');
+        // ПОВЕРТАЄМО НА ТУ САМУ КАРТКУ
+        return redirect('/dashboard?active_card=' . $card->id)
+            ->with('success', 'Рахунок успішно поповнено на ' . number_format($request->amount, 2) . ' грн!');
     }
 
-    // Логіка оплати проїзду
-    public function payFare(Request $request)
+    public function payFare(Request $request, $vehicle_id = null)
     {
+        if ($vehicle_id) {
+            $request->merge(['vehicle_id' => $vehicle_id]);
+        }
+
         $request->validate([
-            'card_id' => 'required|exists:cards,id',
             'vehicle_id' => 'required|exists:vehicles,id'
         ]);
 
-        $card = Card::findOrFail($request->card_id);
+        if ($request->filled('card_id')) {
+            $card = Card::findOrFail($request->card_id);
+        } elseif ($request->filled('card_number')) {
+            $card = Card::where('card_number', $request->card_number)->first();
+            if (!$card) {
+                return back()->with('error', 'Картку не знайдено!')->with('status', 'error');
+            }
+        } else {
+            return back()->withErrors(['error' => 'Дані картки не передано!']);
+        }
+
         $vehicle = Vehicle::with(['city', 'transportType'])->findOrFail($request->vehicle_id);
 
-        // 1. Шукаємо тариф для цього міста та типу транспорту
         $ticketPrice = TicketPrice::where('city_id', $vehicle->city_id)
                                   ->where('transport_type_id', $vehicle->transport_type_id)
+                                  ->where('ticket_type_id', $card->ticket_type_id)
                                   ->first();
 
         if (!$ticketPrice) {
-            return back()->withErrors(['error' => 'Тариф для цього транспорту ще не встановлено!']);
+            return back()
+                ->withErrors(['error' => 'Для вашого типу картки тариф на цей маршрут ще не встановлено!'])
+                ->with('error', 'Тариф не встановлено!')
+                ->with('status', 'error');
         }
 
-        // 2. Перевіряємо баланс
         if ($card->balance < $ticketPrice->price) {
-            return back()->withErrors(['error' => 'Недостатньо коштів! Вартість проїзду: ' . $ticketPrice->price . ' грн']);
+            return back()
+                ->withErrors(['error' => 'Недостатньо коштів! Вартість проїзду: ' . $ticketPrice->price . ' ₴'])
+                ->with('error', 'Недостатньо коштів! Ціна: ' . $ticketPrice->price . ' ₴')
+                ->with('status', 'error');
         }
 
-        // 3. Списуємо кошти та записуємо історію
         DB::transaction(function () use ($card, $ticketPrice, $vehicle) {
             $card->balance -= $ticketPrice->price;
             $card->save();
@@ -97,18 +117,25 @@ class UserController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Оплачено ' . $ticketPrice->price . ' грн за проїзд (' . $vehicle->transportType->type_name . ' №' . $vehicle->vehicle_number . ')');
+        if ($request->filled('card_id')) {
+            return redirect('/dashboard?active_card=' . $card->id)
+                ->with('success', 'Оплачено ' . $ticketPrice->price . ' ₴ за проїзд (' . $vehicle->transportType->type_name . ' №' . $vehicle->vehicle_number . ')');
+        }
+
+        return back()
+            ->with('status', 'success')
+            ->with('success', 'Оплачено ' . $ticketPrice->price . ' ₴')
+            ->with('balance', $card->balance);
     }
 
     public function redirectToValidator(Request $request)
-{
-    $request->validate([
-        'vehicle_id' => 'required',
-        'card_number' => 'required'
-    ]);
+    {
+        $request->validate([
+            'card_id' => 'required|exists:cards,id',
+            'vehicle_id' => 'required|exists:vehicles,id'
+        ]);
 
-    $formattedCard = str_pad($request->card_number, 8, '0', STR_PAD_LEFT);
-
-    return redirect('/validator/' . $request->vehicle_id . '?card=' . $formattedCard);
-}
+        $card = Card::findOrFail($request->card_id);
+        return redirect('/validator/' . $request->vehicle_id . '?card=' . $card->card_number);
+    }
 }

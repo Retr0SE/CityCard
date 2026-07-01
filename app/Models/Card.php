@@ -12,7 +12,8 @@ class Card extends Model
     protected $fillable = [
         'user_id', 
         'card_number',
-        'balance'
+        'balance',
+        'ticket_type_id'
          ];
 
     public function user()
@@ -23,5 +24,10 @@ class Card extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class)->orderBy('created_at', 'desc');
+    }
+
+    public function ticketType()
+    {
+        return $this->belongsTo(TicketType::class, 'ticket_type_id');
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') | CityCard Pro</title>
+    <title>@yield('title') | CityCard Panel</title>
     <style>
         :root {
             --primary-blue: #0052d4; --secondary-blue: #4364f7;
@@ -51,7 +51,7 @@
 <body>
 
     <div class="sidebar">
-        <div class="sidebar-brand">CityCard Pro</div>
+        <div class="sidebar-brand">CityCard Panel</div>
         <div class="sidebar-menu">
             <a href="/admin/dashboard">❖ Головна панель</a>
             <a href="/admin/cities">🏙 Керування містами</a>

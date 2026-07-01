@@ -7,6 +7,7 @@ use App\Http\Controllers\CityController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\TicketPriceController;
 use App\Http\Controllers\ValidatorController;
+use App\Http\Controllers\CardController;
 use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function(){
@@ -23,7 +24,6 @@ Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
 
 // Сторінка реєстрації пасажира
 Route::view('/register', 'auth.user_register')->name('register');
-
 // Обробка форми реєстрації
 Route::post('/register', [AuthController::class, 'registerUser']);
 
@@ -32,10 +32,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     // Маршрут, який просто перекидає з кабінету на валідатор
     Route::post('/card/pay-redirect', [UserController::class, 'redirectToValidator']);
-    
     // Нові маршрути для кнопок
     Route::post('/card/topup', [UserController::class, 'topUp']);
     Route::post('/card/pay', [UserController::class, 'payFare']);
+    Route::post('/user/cards', [CardController::class, 'store'])->name('user.cards.store');
+    Route::delete('/user/cards/{id}', [App\Http\Controllers\CardController::class, 'destroy']);
 });
 
 // Захищені маршрути для адміна (можна додати перевірку ролі)
@@ -76,5 +77,14 @@ Route::get('/run-admin-seeder', function () {
         return "Сідер адміністратора успішно виконано! Нові дані записані.";
     } catch (\Exception $e) {
         return "Помилка при виконанні сідеру: " . $e->getMessage();
+    }
+});
+
+Route::get('/sync-database', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        return "База даних успішно синхронізована!";
+    } catch (\Exception $e) {
+        return "Помилка: " . $e->getMessage();
     }
 });

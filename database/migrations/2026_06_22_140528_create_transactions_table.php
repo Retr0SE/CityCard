@@ -13,13 +13,11 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('card_id')->constrained()->onDelete('cascade');
+            $table->foreignId('card_id')->constrained()->cascadeOnDelete();
             $table->decimal('amount', 10, 2);
-            $table->string('transaction_type'); // 'TOPUP' (поповнення) або 'USE' (оплата проїзду)
+            $table->string('transaction_type');
             
-            // Транспорт може бути відсутнім (якщо це просто поповнення картки)
             $table->foreignId('vehicle_id')->nullable()->constrained()->onDelete('set null');
-            
             $table->timestamps();
         });
     }

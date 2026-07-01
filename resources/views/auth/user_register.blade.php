@@ -136,7 +136,7 @@
             @csrf
             
             <div class="form-group">
-                <label>Вас звати (ПІБ)</label>
+                <label>Прізвище та Ім'я</label>
                 <input type="text" name="full_name" placeholder="Наприклад: Коваленко Петро" required value="{{ old('full_name') }}">
             </div>
 
@@ -146,7 +146,17 @@
             </div>
 
             <div class="form-group">
-                <label>Придумайте пароль</label>
+                <label>Оберіть тип квитка:</label>
+                <select name="ticket_type_id" required style="width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 15px;">
+                    <option value="" disabled selected>Виберіть тариф...</option>
+                    @foreach(\App\Models\TicketType::all() as $type)
+                        <option value="{{ $type->id }}">{{ $type->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Введіть пароль</label>
                 <input type="password" name="password" placeholder="Мінімум 4 символи" required>
             </div>
 
