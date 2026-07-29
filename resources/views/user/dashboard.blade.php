@@ -253,7 +253,10 @@
 
     <div class="navbar">
         <div class="brand">CityCard</div>
-        <a href="/login">Вийти з кабінету</a>
+        <form action="/logout" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-danger">Вийти з кабінету</button>
+        </form>
     </div>
 
     <div class="container">

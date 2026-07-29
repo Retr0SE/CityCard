@@ -18,7 +18,8 @@
         .sidebar-menu a { display: flex; align-items: center; padding: 15px 25px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 15px; border-left: 4px solid transparent; }
         .sidebar-menu a:hover { background-color: #f8fafc; color: var(--primary-blue); border-left-color: var(--primary-blue); }
         .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
-        .btn-logout { display: block; text-align: center; padding: 12px; background-color: #fff5f5; color: #e53e3e; text-decoration: none; border-radius: 8px; font-weight: bold; }
+        .btn-logout { display: block; width: 100%; text-align: center; padding: 12px; background-color: #fff5f5; color: #e53e3e; text-decoration: none; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; font-size: 15px; }
+        .btn-logout:hover { background-color: #fed7d7; }
         
         .main-content { margin-left: 260px; padding: 30px 40px; width: calc(100% - 260px); box-sizing: border-box; }
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
@@ -59,7 +60,11 @@
             <a href="/admin/prices">💳 Тарифи проїзду</a>
         </div>
         <div class="sidebar-footer">
-            <a href="/login" class="btn-logout">Завершити роботу</a>
+            {{-- Виправлено кнопку виходу на форму з POST-запитом --}}
+            <form action="/logout" method="POST">
+                @csrf
+                <button type="submit" class="btn-logout">Завершити роботу</button>
+            </form>
         </div>
     </div>
 
@@ -69,11 +74,32 @@
             <div class="admin-profile">👤 Адміністратор</div>
         </div>
 
-        @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
-        @if($errors->any()) <div class="alert alert-error">{{ $errors->first() }}</div> @endif
+        @if(session('success')) 
+            <div class="alert alert-success auto-dismiss-alert">{{ session('success') }}</div> 
+        @endif
+        
+        @if($errors->any()) 
+            <div class="alert alert-error auto-dismiss-alert">{{ $errors->first() }}</div> 
+        @endif
 
         @yield('content')
     </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const alerts = document.querySelectorAll('.auto-dismiss-alert');
+        
+        if (alerts.length > 0) {
+            setTimeout(function() {
+                alerts.forEach(alert => {
+                    alert.style.transition = "opacity 0.5s ease";
+                    alert.style.opacity = "0";
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 4000);
+        }
+    });
+</script>
 
 </body>
 </html>

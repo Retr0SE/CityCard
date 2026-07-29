@@ -37,12 +37,13 @@ class AuthController extends Controller
 
         $request->validate([
             'full_name' => 'required|string|max:100',
-            'phone' => 'required|string|max:15|unique:users,phone',
+            'phone' => 'required|digits:10|unique:users,phone',
             'password' => 'required|string|min:4|confirmed',
             'ticket_type_id' => 'required|exists:ticket_types,id'
         ], [
             'phone.unique' => 'Користувач із таким номером телефону вже існує!',
-            'ticket_type_id.required' => 'Будь ласка, оберіть тип квитка (тариф)!'
+            'phone.digits' => 'Номер телефону має містити 10 цифр!',
+            'ticket_type_id.required' => 'Оберіть тип квитка!'
         ]);
 
         $user = User::create([
@@ -76,7 +77,6 @@ class AuthController extends Controller
 
     public function loginAdmin(Request $request)
     {
-        // 1. Перевіряємо, чи ввели логін та пароль
         $credentials = $request->validate([
             'login' => 'required',
             'password' => 'required'
@@ -98,5 +98,21 @@ class AuthController extends Controller
         }
 
         return back()->withErrors(['error' => 'Невірний логін або пароль!']);
+    }
+
+    public function logout(Request $request)
+    {
+        $isAdmin = Auth::user() && Auth::user()->role === 'admin';
+
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        if ($isAdmin) {
+            return redirect('/admin/login');
+        }
+
+        return redirect('/login');
     }
 }

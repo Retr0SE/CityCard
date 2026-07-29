@@ -21,15 +21,15 @@
                 @foreach($transportTypes as $type) <option value="{{ $type->id }}">{{ $type->type_name }}</option> @endforeach
             </select>
 
-            <label style="font-weight: 500; display: block; margin-bottom: 8px;">Бортовий номер маршруту:</label>
-            <input type="text" name="vehicle_number" placeholder="Наприклад: 15" required>
+            <label style="font-weight: 500; display: block; margin-bottom: 8px;">Номер маршруту:</label>
+            <input type="text" name="vehicle_number" placeholder="" required>
 
             <button type="submit" class="btn-primary" style="width: 100%;">Зареєструвати транспорт</button>
         </form>
     </div>
 
     <div class="content-card">
-        <h3>Зареєстрований рухомий склад</h3>
+        <h3>Зареєстрований транспорт</h3>
         <table>
             <tr>
                 <th>Місто</th>
@@ -72,7 +72,7 @@
                                     @endforeach
                                 </select>
 
-                                <label style="font-weight: 500; display: block; margin-bottom: 8px;">Бортовий номер:</label>
+                                <label style="font-weight: 500; display: block; margin-bottom: 8px;">Номер маршруту:</label>
                                 <input type="text" name="vehicle_number" value="{{ $vehicle->vehicle_number }}" required>
                                 
                                 <button type="submit" class="btn-primary" style="width: 100%;">Зберегти зміни</button>

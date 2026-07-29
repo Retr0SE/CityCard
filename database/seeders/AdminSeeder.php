@@ -15,7 +15,7 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['login' => 'admin'], // Шукаємо користувача з таким логіном
+            ['login' => 'admin'],
             [
                 'full_name' => 'Головний Адміністратор',
                 'password' => Hash::make('12345'),

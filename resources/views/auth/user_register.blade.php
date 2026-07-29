@@ -137,12 +137,12 @@
             
             <div class="form-group">
                 <label>Прізвище та Ім'я</label>
-                <input type="text" name="full_name" placeholder="Наприклад: Коваленко Петро" required value="{{ old('full_name') }}">
+                <input type="text" name="full_name" placeholder="" required value="{{ old('full_name') }}">
             </div>
 
             <div class="form-group">
                 <label>Номер телефону</label>
-                <input type="text" name="phone" placeholder="0991234567" required value="{{ old('phone') }}">
+                <input type="tel" name="phone" placeholder="" pattern="[0-9]{10}" required value="{{ old('phone') }}">
             </div>
 
             <div class="form-group">

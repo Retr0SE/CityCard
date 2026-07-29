@@ -14,32 +14,34 @@ Route::get('/', function(){
     return redirect('/login');
 });
 
-// Сторінки входу
+// login pages
 Route::view('/login', 'auth.user_login')->name('login');
 Route::view('/admin/login', 'auth.admin_login');
 
-// Обробка форм входу
+// handling login forms
 Route::post('/login', [AuthController::class, 'loginUser']);
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
+// logout page
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Сторінка реєстрації пасажира
+// passenger registration page
 Route::view('/register', 'auth.user_register')->name('register');
-// Обробка форми реєстрації
+// handling registration page
 Route::post('/register', [AuthController::class, 'registerUser']);
 
-// Захищені маршрути для користувача
+// protected routes for user
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
-    // Маршрут, який просто перекидає з кабінету на валідатор
+    // A route that redirects the user from the dashboard to the validator
     Route::post('/card/pay-redirect', [UserController::class, 'redirectToValidator']);
-    // Нові маршрути для кнопок
+    // new routes for buttons
     Route::post('/card/topup', [UserController::class, 'topUp']);
     Route::post('/card/pay', [UserController::class, 'payFare']);
     Route::post('/user/cards', [CardController::class, 'store'])->name('user.cards.store');
     Route::delete('/user/cards/{id}', [App\Http\Controllers\CardController::class, 'destroy']);
 });
 
-// Захищені маршрути для адміна (можна додати перевірку ролі)
+// protected routes for admin
 Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin')->group(function () {
     
     Route::view('/dashboard', 'admin.dashboard')->name('admin.dashboard');
@@ -50,42 +52,17 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
 
 });
 
-// Імітація фізичного валідатора у транспорті
+// simulation of a validator on public transport
 Route::get('/validator/{vehicle_id}', [ValidatorController::class, 'showTerminal']);
 Route::post('/validator/{vehicle_id}/scan', [ValidatorController::class, 'processPayment']);
 
 
-Route::get('/run-transport-seeder', function () {
-    try {
-        Artisan::call('db:seed', [
-            // Вкажіть тут точну назву вашого класу сідеру
-            '--class' => 'Database\\Seeders\\TransportSeeder', 
-            '--force' => true
-        ]);
-        return "Транспорт успішно завантажено в базу!";
-    } catch (\Exception $e) {
-        return "Помилка: " . $e->getMessage();
-    }
-});
-
-Route::get('/run-admin-seeder', function () {
-    try {
-        Artisan::call('db:seed', [
-            '--class' => 'Database\\Seeders\\AdminSeeder',
-            '--force' => true // Обов'язково для запуску в production на Render
-        ]);
-        return "Сідер адміністратора успішно виконано! Нові дані записані.";
-    } catch (\Exception $e) {
-        return "Помилка при виконанні сідеру: " . $e->getMessage();
-    }
-});
-
 Route::get('/sync-database', function () {
     try {
-        // 1. Спочатку створюємо таблиці
+        // 1. create tables
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
         
-        // 2. Потім наповнюємо їх
+        // 2. fill tables with data
         \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
         
         return "База даних успішно створена та синхронізована!";

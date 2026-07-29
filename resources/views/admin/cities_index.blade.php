@@ -10,7 +10,7 @@
         <form action="/admin/cities" method="POST">
             @csrf
             <label style="font-weight: 500; font-size: 14px; margin-bottom: 8px; display: block;">Назва міста:</label>
-            <input type="text" name="city_name" placeholder="Наприклад: Київ" required>
+            <input type="text" name="city_name" placeholder="" required>
             <button type="submit" class="btn-primary" style="width: 100%;">Зберегти місто</button>
         </form>
     </div>
